@@ -48,6 +48,23 @@
     .grid-2{display:grid; grid-template-columns:1fr; gap:14px}
     @media (min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
     .footer{color:var(--muted); font-size:12px; margin-top:20px}
+
+    /* Toast */
+    .toast{
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+      background:rgba(17,24,39,.96); color:#e5e7eb;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:12px; padding:10px 14px;
+      box-shadow:0 10px 25px rgba(0,0,0,.35);
+      opacity:0; pointer-events:none;
+      transition:opacity .4s ease, transform .4s ease;
+      z-index:9999;
+    }
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
+    .toast.success{border-color:#16a34a}
+    .toast.info{border-color:#38bdf8}
+    .toast.warn{border-color:#f59e0b}
+    .toast.error{border-color:#ef4444}
   </style>
 </head>
 <body>
@@ -61,6 +78,9 @@
         </div>
       </div>
     </header>
+
+    <!-- Toast element -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <form id="inv-form" class="card" autocomplete="on">
       <div class="row">
@@ -169,7 +189,7 @@
         <button type="button" class="danger" id="btn-clear">🗑️ Rensa allt</button>
       </div>
 
-      <div class="footer">Tips: "Spara i webbläsaren" sparar lokalt på denna enhet (localStorage). Inget skickas till någon server.</div>Tips: "Spara i webbläsaren" sparar lokalt på denna enhet (localStorage). Inget skickas till någon server.</div>
+      <div class="footer">Tips: "Spara i webbläsaren" sparar lokalt på denna enhet (localStorage). Inget skickas till någon server.</div>
     </form>
   </div>
 
@@ -179,7 +199,7 @@
     const text = asText();
     try{
       await navigator.clipboard.writeText(text);
-      alert('Kopierat till urklipp. Du kan nu klistra in din inventering i valfri chatt.');
+      showToast('Kopierat till urklipp ✔', 'success');
     }catch(err){
       // Fallback för äldre webbläsare
       const ta = document.createElement('textarea');
@@ -189,11 +209,22 @@
       document.body.appendChild(ta);
       ta.focus();
       ta.select();
-      try{ document.execCommand('copy'); alert('Kopierat till urklipp.'); }
-      catch(e){ alert('Kunde inte kopiera automatiskt. Markera texten manuellt.'); }
+      try{ document.execCommand('copy'); showToast('Kopierat till urklipp ✔', 'success'); }
+      catch(e){ showToast('Kunde inte kopiera automatiskt', 'error'); }
       finally{ document.body.removeChild(ta); }
     }
   }
+
+  function showToast(msg, type='info'){
+    const el = document.getElementById('toast');
+    if(!el) return;
+    el.textContent = msg;
+    el.className = `toast show ${type}`;
+    clearTimeout(showToast._t1); clearTimeout(showToast._t2);
+    showToast._t1 = setTimeout(()=>{ el.classList.remove('show'); }, 2200); // visa 2.2s
+    showToast._t2 = setTimeout(()=>{ el.className = 'toast'; }, 3200);      // fade klar vid ~3.2s
+  }
+
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
   const today = new Date().toISOString().slice(0,10);
@@ -249,7 +280,7 @@
     return lines.join('\n');
   }
 
-    function saveLocal(){
+  function saveLocal(){
     const payload = {
       date: $('#date').value,
       time: $('#time').value,
@@ -265,12 +296,12 @@
       prayer: $('#prayer').value
     };
     localStorage.setItem('aca-step10', JSON.stringify(payload));
-    alert('Sparat lokalt i webbläsaren.');
+    showToast('Sparat lokalt i webbläsaren 💾', 'info');
   }
 
   function loadLocal(){
     const raw = localStorage.getItem('aca-step10');
-    if(!raw){ alert('Ingen sparad data hittades.'); return; }
+    if(!raw){ showToast('Ingen sparad data hittades', 'warn'); return; }
     try{
       const d = JSON.parse(raw);
       $('#date').value = d.date || today;
@@ -285,9 +316,9 @@
       $('#progress').value = d.progress || '';
       $('#gratitude').value = d.gratitude || '';
       $('#prayer').value = d.prayer || '';
-      alert('Data laddad.');
+      showToast('Data laddad 📥', 'success');
     }catch(e){
-      alert('Kunde inte läsa sparad data.');
+      showToast('Kunde inte läsa sparad data', 'error');
     }
   }
 
@@ -297,7 +328,7 @@
     $('#date').value = today;
   }
 
-    document.getElementById('btn-copy').addEventListener('click', copyToClipboard);
+  document.getElementById('btn-copy').addEventListener('click', copyToClipboard);
   document.getElementById('btn-save').addEventListener('click', saveLocal);
   document.getElementById('btn-load').addEventListener('click', loadLocal);
   document.getElementById('btn-clear').addEventListener('click', clearAll);
