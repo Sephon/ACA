@@ -195,40 +195,34 @@
 
 <script>
 (function(){
-  async function copyToClipboard(){
-    const text = asText();
-    try{
-      await navigator.clipboard.writeText(text);
-      showToast('Kopierat till urklipp ✔', 'success');
-    }catch(err){
-      // Fallback för äldre webbläsare
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try{ document.execCommand('copy'); showToast('Kopierat till urklipp ✔', 'success'); }
-      catch(e){ showToast('Kunde inte kopiera automatiskt', 'error'); }
-      finally{ document.body.removeChild(ta); }
-    }
-  }
-
+  // --- Toast ---
   function showToast(msg, type='info'){
-    const el = document.getElementById('toast');
-    if(!el) return;
+    let el = document.getElementById('toast');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      el.setAttribute('role','status');
+      el.setAttribute('aria-live','polite');
+      document.body.appendChild(el);
+    }
     el.textContent = msg;
     el.className = `toast show ${type}`;
     clearTimeout(showToast._t1); clearTimeout(showToast._t2);
-    showToast._t1 = setTimeout(()=>{ el.classList.remove('show'); }, 2200); // visa 2.2s
-    showToast._t2 = setTimeout(()=>{ el.className = 'toast'; }, 3200);      // fade klar vid ~3.2s
+    showToast._t1 = setTimeout(()=>{ el.classList.remove('show'); }, 2200);
+    showToast._t2 = setTimeout(()=>{ el.className = 'toast'; }, 3200);
   }
 
+  // --- Helpers ---
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const STORAGE_KEY = 'aca-step10-v2';
+
+  // Sätt dagens datum i datumfältet om tomt
   const today = new Date().toISOString().slice(0,10);
-  $('#date').value = today;
+  document.addEventListener('DOMContentLoaded', ()=>{
+    if(!$('#date').value){ $('#date').value = today; }
+  });
 
   function collectChecked(cls){
     return $$(cls).filter(el=>el.checked).map(el=>el.value);
@@ -280,8 +274,8 @@
     return lines.join('\n');
   }
 
-  function saveLocal(){
-    const payload = {
+  function gatherPayload(){
+    return {
       date: $('#date').value,
       time: $('#time').value,
       events: $('#events').value,
@@ -295,29 +289,53 @@
       gratitude: $('#gratitude').value,
       prayer: $('#prayer').value
     };
-    localStorage.setItem('aca-step10', JSON.stringify(payload));
+  }
+
+  function applyPayload(d){
+    if(!d) return;
+    $('#date').value = d.date || today;
+    $('#time').value = d.time || '';
+    $('#events').value = d.events || '';
+    $$('.feeling').forEach(cb => cb.checked = (d.feelings||[]).includes(cb.value));
+    $('#feeling-other').value = d.feelingOther || '';
+    $('#inner-child').value = d.innerChild || '';
+    $$('.reaction').forEach(cb => cb.checked = (d.reactions||[]).includes(cb.value));
+    $('#reaction-notes').value = d.reactionNotes || '';
+    $('#values').value = d.values || '';
+    $('#progress').value = d.progress || '';
+    $('#gratitude').value = d.gratitude || '';
+    $('#prayer').value = d.prayer || '';
+  }
+
+  // --- Clipboard ---
+  async function copyToClipboard(){
+    const text = asText();
+    try{
+      await navigator.clipboard.writeText(text);
+      showToast('Kopierat till urklipp ✔', 'success');
+    }catch{
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ document.execCommand('copy'); showToast('Kopierat till urklipp ✔', 'success'); }
+      catch{ showToast('Kunde inte kopiera automatiskt', 'error'); }
+      finally{ document.body.removeChild(ta); }
+    }
+  }
+
+  // --- Manuell spara/ladda ---
+  function saveLocal(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gatherPayload()));
     showToast('Sparat lokalt i webbläsaren 💾', 'info');
   }
 
   function loadLocal(){
-    const raw = localStorage.getItem('aca-step10');
+    const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw){ showToast('Ingen sparad data hittades', 'warn'); return; }
     try{
-      const d = JSON.parse(raw);
-      $('#date').value = d.date || today;
-      $('#time').value = d.time || '';
-      $('#events').value = d.events || '';
-      $$('.feeling').forEach(cb => cb.checked = (d.feelings||[]).includes(cb.value));
-      $('#feeling-other').value = d.feelingOther || '';
-      $('#inner-child').value = d.innerChild || '';
-      $$('.reaction').forEach(cb => cb.checked = (d.reactions||[]).includes(cb.value));
-      $('#reaction-notes').value = d.reactionNotes || '';
-      $('#values').value = d.values || '';
-      $('#progress').value = d.progress || '';
-      $('#gratitude').value = d.gratitude || '';
-      $('#prayer').value = d.prayer || '';
+      applyPayload(JSON.parse(raw));
       showToast('Data laddad 📥', 'success');
-    }catch(e){
+    }catch{
       showToast('Kunde inte läsa sparad data', 'error');
     }
   }
@@ -326,13 +344,51 @@
     if(!confirm('Rensa alla fält?')) return;
     document.getElementById('inv-form').reset();
     $('#date').value = today;
+    showToast('Formuläret rensat', 'info');
   }
 
-  document.getElementById('btn-copy').addEventListener('click', copyToClipboard);
-  document.getElementById('btn-save').addEventListener('click', saveLocal);
-  document.getElementById('btn-load').addEventListener('click', loadLocal);
-  document.getElementById('btn-clear').addEventListener('click', clearAll);
+  // --- Autosave (debounced) + Autoload ---
+  let autosaveTimer = null;
+  function scheduleAutosave(){
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(()=>{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(gatherPayload()));
+      // Visa en diskret bekräftelse ibland:
+      showToast('Autosparat 💾', 'info');
+    }, 3000); // 3s efter senaste ändring
+  }
+
+  // Autoload när sidan öppnas
+  (function autoloadOnStart(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    try{
+      applyPayload(JSON.parse(raw));
+      showToast('Auto-laddat från webbläsaren', 'success');
+    }catch{
+      // tyst fel
+    }
+  })();
+
+  // Lyssna på alla inmatningar för autosave
+  ['input','change'].forEach(evt=>{
+    document.addEventListener(evt, (e)=>{
+      // Spara bara om det är inom vårt formulär
+      if(e.target && e.target.closest && e.target.closest('#inv-form')){
+        scheduleAutosave();
+      }
+    }, true);
+  });
+
+  // --- Event bindningar ---
+  document.getElementById('btn-copy')?.addEventListener('click', copyToClipboard);
+  document.getElementById('btn-save')?.addEventListener('click', saveLocal);
+  document.getElementById('btn-load')?.addEventListener('click', loadLocal);
+  document.getElementById('btn-clear')?.addEventListener('click', clearAll);
+
+  // Om dina knappar heter annorlunda, uppdatera selektorerna ovan.
 })();
 </script>
+
 </body>
 </html>
