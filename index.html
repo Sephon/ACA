@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🧾 ACA Steg 10 – Daglig inventering</title>
+  <style>
+    :root{
+      --bg:#0f172a; /* slate-900 */
+      --panel:#111827; /* gray-900 */
+      --ink:#e5e7eb; /* gray-200 */
+      --muted:#9ca3af; /* gray-400 */
+      --accent:#22c55e; /* green-500 */
+      --accent-2:#38bdf8; /* sky-400 */
+      --danger:#ef4444; /* red-500 */
+      --shadow:0 10px 25px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(56,189,248,.10), transparent),
+                  radial-gradient(900px 500px at 110% 10%, rgba(34,197,94,.10), transparent),
+                  var(--bg);
+      color:var(--ink);
+    }
+    .wrap{max-width:960px; margin:28px auto; padding:20px}
+    header{display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .title{display:flex; gap:12px; align-items:center}
+    .title h1{margin:0; font-size:clamp(20px,3vw,28px)}
+    .subtitle{color:var(--muted); font-size:14px; max-width:680px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-top:16px}
+    fieldset{border:none; padding:0; margin:0}
+    legend{font-weight:700; margin-bottom:10px}
+    label{display:block; margin:10px 0 6px; color:var(--ink)}
+    input[type="text"], input[type="date"], textarea{width:100%; background:#0b1220; border:1px solid rgba(255,255,255,.12); color:var(--ink); border-radius:12px; padding:12px 14px; outline:none}
+    textarea{min-height:110px; resize:vertical}
+    .row{display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:10px}
+    .chips{display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:8px; margin-top:8px}
+    .chip{display:flex; align-items:center; gap:8px; background:#0b1220; border:1px solid rgba(255,255,255,.10); border-radius:12px; padding:10px 12px}
+    .hint{color:var(--muted); font-size:12.5px}
+    .actions{position:sticky; bottom:12px; display:flex; gap:10px; flex-wrap:wrap; margin-top:20px}
+    button{appearance:none; border:none; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer}
+    .primary{background:linear-gradient(135deg, var(--accent), #16a34a); color:#06100a}
+    .ghost{background:transparent; color:var(--ink); border:1px solid rgba(255,255,255,.15)}
+    .danger{background:linear-gradient(135deg, var(--danger), #b91c1c); color:#170707}
+    .ok{background:linear-gradient(135deg, var(--accent-2), #0284c7); color:#03121a}
+    .grid-2{display:grid; grid-template-columns:1fr; gap:14px}
+    @media (min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
+    .footer{color:var(--muted); font-size:12px; margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <div style="font-size:28px">🧾</div>
+        <div>
+          <h1>ACA Steg 10 – Daglig inventering</h1>
+          <div class="subtitle">”Vi fortsatte vår självrannsakan och erkände genast när vi hade fel.” (Steg 10, ACA Fellowship Text)</div>
+        </div>
+      </div>
+    </header>
+
+    <form id="inv-form" class="card" autocomplete="on">
+      <div class="row">
+        <label>📅 Datum
+          <input type="date" id="date" />
+        </label>
+        <label>🕰️ Tid (valfritt)
+          <input type="text" id="time" placeholder="Kväll / 21:30 / etc." />
+        </label>
+      </div>
+
+      <div class="card">
+        <fieldset>
+          <legend>1️⃣ Dagens händelser</legend>
+          <div class="hint">Vad hände idag som påverkade mig känslomässigt? (situationer, samtal, beslut – positiva eller negativa)</div>
+          <textarea id="events" placeholder="Ex: Kände mig avvisad när ingen lyssnade på min idé ..."></textarea>
+        </fieldset>
+      </div>
+
+      <div class="card">
+        <fieldset>
+          <legend>2️⃣ Känslor</legend>
+          <div class="hint">Kryssa i det som stämmer och/eller skriv egna.</div>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" value="Rädsla" class="feeling"> Rädsla</label>
+            <label class="chip"><input type="checkbox" value="Ilska" class="feeling"> Ilska</label>
+            <label class="chip"><input type="checkbox" value="Skam" class="feeling"> Skam</label>
+            <label class="chip"><input type="checkbox" value="Skuld" class="feeling"> Skuld</label>
+            <label class="chip"><input type="checkbox" value="Sorg" class="feeling"> Sorg</label>
+            <label class="chip"><input type="checkbox" value="Ensamhet" class="feeling"> Ensamhet</label>
+            <label class="chip"><input type="checkbox" value="Stress" class="feeling"> Stress</label>
+            <label class="chip"><input type="checkbox" value="Lättnad" class="feeling"> Lättnad</label>
+            <label class="chip"><input type="checkbox" value="Glädje" class="feeling"> Glädje</label>
+            <label class="chip"><input type="checkbox" value="Tacksamhet" class="feeling"> Tacksamhet</label>
+          </div>
+          <label style="margin-top:10px">✍️ Andra känslor
+            <input type="text" id="feeling-other" placeholder="Ex: Hopplöshet, förvirring, hopp ..." />
+          </label>
+        </fieldset>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <fieldset>
+            <legend>3️⃣ Mitt inre barn</legend>
+            <div class="hint">Kände jag mig liten, bortglömd, rädd, oälskad?</div>
+            <textarea id="inner-child" placeholder="Vad kände det inre barnet? Vad behövde jag?"></textarea>
+          </fieldset>
+        </div>
+        <div class="card">
+          <fieldset>
+            <legend>4️⃣ Min reaktion</legend>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" value="Reaktiv" class="reaction"> Reaktiv</label>
+              <label class="chip"><input type="checkbox" value="Kontrollerande" class="reaction"> Kontrollerande</label>
+              <label class="chip"><input type="checkbox" value="Undvikande" class="reaction"> Undvikande</label>
+              <label class="chip"><input type="checkbox" value="Aggressiv" class="reaction"> Aggressiv</label>
+              <label class="chip"><input type="checkbox" value="Nedlåtande" class="reaction"> Nedlåtande</label>
+              <label class="chip"><input type="checkbox" value="Ärlig" class="reaction"> Ärlig</label>
+              <label class="chip"><input type="checkbox" value="Sårbar" class="reaction"> Sårbar</label>
+              <label class="chip"><input type="checkbox" value="Lyssnande" class="reaction"> Lyssnande</label>
+            </div>
+            <label style="margin-top:10px">✍️ Beskriv
+              <textarea id="reaction-notes" placeholder="Hur agerade jag? Vad blev effekten?"></textarea>
+            </label>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <fieldset>
+            <legend>5️⃣ Mina värderingar</legend>
+            <div class="hint">Gick jag emot mina värderingar? Behöver jag erkänna/gottgöra/be om hjälp?</div>
+            <textarea id="values" placeholder="Om ja: vad behöver jag göra imorgon?"></textarea>
+          </fieldset>
+        </div>
+        <div class="card">
+          <fieldset>
+            <legend>6️⃣ Framsteg</legend>
+            <div class="hint">Vad gjorde jag bra idag – även om det var litet?</div>
+            <textarea id="progress" placeholder="Små steg räknas."></textarea>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <fieldset>
+            <legend>7️⃣ Tacksamhet</legend>
+            <textarea id="gratitude" placeholder="Minst 1–3 saker."></textarea>
+          </fieldset>
+        </div>
+        <div class="card">
+          <fieldset>
+            <legend>8️⃣ Önskan eller bön för imorgon</legend>
+            <textarea id="prayer" placeholder="”Hjälp mig att släppa taget om… / Stärk mig i att…”"></textarea>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" id="btn-copy">📋 Kopiera till urklipp</button>
+        <button type="button" class="ok" id="btn-save">💾 Spara i webbläsaren</button>
+        <button type="button" class="ghost" id="btn-load">📥 Ladda från webbläsaren</button>
+        <button type="button" class="danger" id="btn-clear">🗑️ Rensa allt</button>
+      </div>
+
+      <div class="footer">Tips: "Spara i webbläsaren" sparar lokalt på denna enhet (localStorage). Inget skickas till någon server.</div>Tips: "Spara i webbläsaren" sparar lokalt på denna enhet (localStorage). Inget skickas till någon server.</div>
+    </form>
+  </div>
+
+<script>
+(function(){
+  async function copyToClipboard(){
+    const text = asText();
+    try{
+      await navigator.clipboard.writeText(text);
+      alert('Kopierat till urklipp. Du kan nu klistra in din inventering i valfri chatt.');
+    }catch(err){
+      // Fallback för äldre webbläsare
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try{ document.execCommand('copy'); alert('Kopierat till urklipp.'); }
+      catch(e){ alert('Kunde inte kopiera automatiskt. Markera texten manuellt.'); }
+      finally{ document.body.removeChild(ta); }
+    }
+  }
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const today = new Date().toISOString().slice(0,10);
+  $('#date').value = today;
+
+  function collectChecked(cls){
+    return $$(cls).filter(el=>el.checked).map(el=>el.value);
+  }
+
+  function asText(){
+    const date = $('#date').value || '';
+    const time = $('#time').value || '';
+    const events = $('#events').value || '';
+    const feelings = collectChecked('.feeling');
+    const feelingOther = $('#feeling-other').value || '';
+    const innerChild = $('#inner-child').value || '';
+    const reactions = collectChecked('.reaction');
+    const reactionNotes = $('#reaction-notes').value || '';
+    const values = $('#values').value || '';
+    const progress = $('#progress').value || '';
+    const gratitude = $('#gratitude').value || '';
+    const prayer = $('#prayer').value || '';
+
+    const lines = [
+`🧾 ACA Steg 10 – Daglig inventering`,
+`📅 Datum: ${date}${time? '   🕰️ Tid: ' + time : ''}`,
+``,
+`1️⃣ Dagens händelser`,
+`${events}`,
+``,
+`2️⃣ Känslor`,
+`${[...feelings, feelingOther].filter(Boolean).join(', ') || '(inga valda)'}`,
+``,
+`3️⃣ Mitt inre barn`,
+`${innerChild}`,
+``,
+`4️⃣ Min reaktion`,
+`${[...reactions].join(', ') || '(inga valda)'}`,
+`${reactionNotes}`,
+``,
+`5️⃣ Mina värderingar`,
+`${values}`,
+``,
+`6️⃣ Framsteg`,
+`${progress}`,
+``,
+`7️⃣ Tacksamhet`,
+`${gratitude}`,
+``,
+`8️⃣ Önskan/bön för imorgon`,
+`${prayer}`
+];
+    return lines.join('\n');
+  }
+
+    function saveLocal(){
+    const payload = {
+      date: $('#date').value,
+      time: $('#time').value,
+      events: $('#events').value,
+      feelings: collectChecked('.feeling'),
+      feelingOther: $('#feeling-other').value,
+      innerChild: $('#inner-child').value,
+      reactions: collectChecked('.reaction'),
+      reactionNotes: $('#reaction-notes').value,
+      values: $('#values').value,
+      progress: $('#progress').value,
+      gratitude: $('#gratitude').value,
+      prayer: $('#prayer').value
+    };
+    localStorage.setItem('aca-step10', JSON.stringify(payload));
+    alert('Sparat lokalt i webbläsaren.');
+  }
+
+  function loadLocal(){
+    const raw = localStorage.getItem('aca-step10');
+    if(!raw){ alert('Ingen sparad data hittades.'); return; }
+    try{
+      const d = JSON.parse(raw);
+      $('#date').value = d.date || today;
+      $('#time').value = d.time || '';
+      $('#events').value = d.events || '';
+      $$('.feeling').forEach(cb => cb.checked = (d.feelings||[]).includes(cb.value));
+      $('#feeling-other').value = d.feelingOther || '';
+      $('#inner-child').value = d.innerChild || '';
+      $$('.reaction').forEach(cb => cb.checked = (d.reactions||[]).includes(cb.value));
+      $('#reaction-notes').value = d.reactionNotes || '';
+      $('#values').value = d.values || '';
+      $('#progress').value = d.progress || '';
+      $('#gratitude').value = d.gratitude || '';
+      $('#prayer').value = d.prayer || '';
+      alert('Data laddad.');
+    }catch(e){
+      alert('Kunde inte läsa sparad data.');
+    }
+  }
+
+  function clearAll(){
+    if(!confirm('Rensa alla fält?')) return;
+    document.getElementById('inv-form').reset();
+    $('#date').value = today;
+  }
+
+    document.getElementById('btn-copy').addEventListener('click', copyToClipboard);
+  document.getElementById('btn-save').addEventListener('click', saveLocal);
+  document.getElementById('btn-load').addEventListener('click', loadLocal);
+  document.getElementById('btn-clear').addEventListener('click', clearAll);
+})();
+</script>
+</body>
+</html>
