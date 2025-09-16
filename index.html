@@ -222,6 +222,12 @@
   const today = new Date().toISOString().slice(0,10);
   document.addEventListener('DOMContentLoaded', ()=>{
     if(!$('#date').value){ $('#date').value = today; }
+    if(!$('#time').value){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    $('#time').value = `${hh}:${mm}`;
+  }
   });
 
   function collectChecked(cls){
